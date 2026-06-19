@@ -30,7 +30,7 @@ namespace HomeworkManager.Models
         public Homework()
         {
             Id = Guid.NewGuid().ToString();
-            DueDate = DateTime.Today.AddDays(7);
+            DueDate = DateTime.Today;
             IsCompleted = false;
         }
     }
