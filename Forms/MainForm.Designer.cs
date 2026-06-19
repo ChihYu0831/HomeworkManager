@@ -180,7 +180,7 @@ namespace HomeworkManager.Forms
             // cmbCourse
             // 
             this.cmbCourse.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDown;
-            this.cmbCourse.Items.AddRange(new object[] { "數學", "英文", "程式設計", "資料結構", "作業系統", "網路概論" });
+            this.cmbCourse.Items.AddRange(new object[] { "羽球入門", "作業系統概論", "組合語言與計算機組織", "程式設計（二）", "視窗程式設計（二）", "演算法概論", "機率與統計", "醫療資訊學概論" });
             this.cmbCourse.Location = new System.Drawing.Point(100, 30);
             this.cmbCourse.Name = "cmbCourse";
             this.cmbCourse.Size = new System.Drawing.Size(200, 28);
@@ -334,8 +334,8 @@ namespace HomeworkManager.Forms
             // 
             this.dgvHomework.AllowUserToAddRows = false;
             this.dgvHomework.AllowUserToDeleteRows = false;
+            this.dgvHomework.AutoGenerateColumns = false;
             this.dgvHomework.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
-            this.dgvHomework.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvHomework.BackgroundColor = System.Drawing.Color.White;
             this.dgvHomework.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dgvHomework.ColumnHeadersHeight = 34;

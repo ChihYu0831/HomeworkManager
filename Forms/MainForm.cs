@@ -45,20 +45,26 @@ namespace HomeworkManager.Forms
         private void SetupGrid()
         {
             dgvHomework.Columns.Clear();
+            dgvHomework.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.None;
+
             dgvHomework.Columns.Add(new DataGridViewTextBoxColumn { Name = "colId", HeaderText = "ID", DataPropertyName = "Id", Visible = false });
-            dgvHomework.Columns.Add(new DataGridViewTextBoxColumn { Name = "colCourse", HeaderText = "課程", DataPropertyName = "CourseName", FillWeight = 15 });
-            dgvHomework.Columns.Add(new DataGridViewTextBoxColumn { Name = "colTitle", HeaderText = "標題", DataPropertyName = "Title", FillWeight = 20 });
-            dgvHomework.Columns.Add(new DataGridViewTextBoxColumn { Name = "colContent", HeaderText = "內容", DataPropertyName = "Content", FillWeight = 25 });
+            dgvHomework.Columns.Add(new DataGridViewTextBoxColumn { Name = "colCourse", HeaderText = "課程", DataPropertyName = "CourseName", Width = 160 });
+            dgvHomework.Columns.Add(new DataGridViewTextBoxColumn { Name = "colTitle", HeaderText = "標題", DataPropertyName = "Title", Width = 160 });
+            dgvHomework.Columns.Add(new DataGridViewTextBoxColumn { Name = "colContent", HeaderText = "內容", DataPropertyName = "Content", Width = 200 });
             dgvHomework.Columns.Add(new DataGridViewTextBoxColumn
             {
                 Name = "colDue",
                 HeaderText = "截止日期",
                 DataPropertyName = "DueDate",
-                FillWeight = 15,
-                DefaultCellStyle = new DataGridViewCellStyle { Format = "yyyy/MM/dd" }
+                Width = 120,
+                DefaultCellStyle = new DataGridViewCellStyle { Format = "yyyy/MM/dd HH:mm" }
             });
-            dgvHomework.Columns.Add(new DataGridViewTextBoxColumn { Name = "colStatus", HeaderText = "狀態", DataPropertyName = "StatusText", FillWeight = 10 });
-            dgvHomework.Columns.Add(new DataGridViewTextBoxColumn { Name = "colReminder", HeaderText = "提醒", DataPropertyName = "ReminderText", FillWeight = 15 });
+            dgvHomework.Columns.Add(new DataGridViewTextBoxColumn { Name = "colStatus", HeaderText = "狀態", DataPropertyName = "StatusText", Width = 80 });
+
+            // 提醒欄自動填滿剩餘空間
+            var colReminder = new DataGridViewTextBoxColumn { Name = "colReminder", HeaderText = "提醒", DataPropertyName = "ReminderText" };
+            colReminder.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            dgvHomework.Columns.Add(colReminder);
         }
 
         private void RefreshGrid(List<Homework> list)
@@ -113,7 +119,8 @@ namespace HomeworkManager.Forms
                 txtTitle.Text = hw.Title;
                 txtContent.Text = hw.Content;
                 dtpDueDate.MinDate = new DateTime(2000, 1, 1);
-                dtpDueDate.Value = hw.DueDate;
+                dtpDueDate.MaxDate = new DateTime(2100, 12, 31);
+                dtpDueDate.Value = hw.DueDate.Date;
                 dtpDueDate.MinDate = DateTime.Today;
                 cmbStatus.SelectedIndex = hw.IsCompleted ? 1 : 0;
             }
@@ -129,7 +136,7 @@ namespace HomeworkManager.Forms
                 CourseName = cmbCourse.Text.Trim(),
                 Title = txtTitle.Text.Trim(),
                 Content = txtContent.Text.Trim(),
-                DueDate = dtpDueDate.Value.Date,
+                DueDate = dtpDueDate.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59),
                 IsCompleted = cmbStatus.SelectedIndex == 1
             };
             _service.Add(hw);
@@ -153,7 +160,7 @@ namespace HomeworkManager.Forms
                 CourseName = cmbCourse.Text.Trim(),
                 Title = txtTitle.Text.Trim(),
                 Content = txtContent.Text.Trim(),
-                DueDate = dtpDueDate.Value.Date,
+                DueDate = dtpDueDate.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59),
                 IsCompleted = cmbStatus.SelectedIndex == 1
             };
             _service.Update(hw);
