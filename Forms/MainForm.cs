@@ -12,6 +12,7 @@ namespace HomeworkManager.Forms
     {
         private readonly HomeworkService _service;
         private string _selectedId = null;
+        private bool _isLoading = false;
 
         public MainForm()
         {
@@ -24,6 +25,26 @@ namespace HomeworkManager.Forms
             WireEvents();
             SetupGrid();
             RefreshGrid(_service.GetAll());
+
+            this.Load += (s, e) => {
+                dgvHomework.CurrentCell = null;
+                dgvHomework.ClearSelection();
+                ClearInputs();
+
+                // 今日到期警告
+                var todayDue = _service.GetAll()
+                    .Where(h => !h.IsCompleted && h.DueDate.Date == DateTime.Today)
+                    .ToList();
+                if (todayDue.Count > 0)
+                {
+                    string list = string.Join("\n", todayDue.Select(h => $"・{h.CourseName}　{h.Title}"));
+                    MessageBox.Show(
+                        $"⚠️ 今天有 {todayDue.Count} 筆作業即將到期：\n\n{list}",
+                        "今日到期提醒",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                }
+            };
         }
 
         // ── Events ────────────────────────────────────────────────────
@@ -57,7 +78,7 @@ namespace HomeworkManager.Forms
                 HeaderText = "截止日期",
                 DataPropertyName = "DueDate",
                 Width = 120,
-                DefaultCellStyle = new DataGridViewCellStyle { Format = "yyyy/MM/dd HH:mm" }
+                DefaultCellStyle = new DataGridViewCellStyle { Format = "yyyy/MM/dd" }
             });
             dgvHomework.Columns.Add(new DataGridViewTextBoxColumn { Name = "colStatus", HeaderText = "狀態", DataPropertyName = "StatusText", Width = 80 });
 
@@ -69,10 +90,13 @@ namespace HomeworkManager.Forms
 
         private void RefreshGrid(List<Homework> list)
         {
+            _isLoading = true;
             dgvHomework.DataSource = null;
             dgvHomework.DataSource = list;
             UpdateStats(list);
             _selectedId = null;
+            dgvHomework.ClearSelection();
+            _isLoading = false;
         }
 
         private void UpdateStats(List<Homework> list)
@@ -112,6 +136,7 @@ namespace HomeworkManager.Forms
         // ── SelectionChanged ──────────────────────────────────────────
         private void DgvHomework_SelectionChanged(object sender, EventArgs e)
         {
+            if (_isLoading) return;
             if (dgvHomework.CurrentRow?.DataBoundItem is Homework hw)
             {
                 _selectedId = hw.Id;
@@ -238,13 +263,16 @@ namespace HomeworkManager.Forms
 
         private void ClearInputs()
         {
+            _isLoading = true;
             cmbCourse.Text = "";
             txtTitle.Clear();
             txtContent.Clear();
-            dtpDueDate.Value = DateTime.Today.AddDays(7);
+            dtpDueDate.Value = DateTime.Today;
             cmbStatus.SelectedIndex = 0;
             _selectedId = null;
+            dgvHomework.CurrentCell = null;
             dgvHomework.ClearSelection();
+            _isLoading = false;
         }
     }
 }
