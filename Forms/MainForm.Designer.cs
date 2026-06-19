@@ -34,6 +34,7 @@ namespace HomeworkManager.Forms
             this.grpSearch = new System.Windows.Forms.GroupBox();
             this.btnShowAll = new System.Windows.Forms.Button();
             this.btnSearch = new System.Windows.Forms.Button();
+            this.btnDarkMode = new System.Windows.Forms.Button();
             this.txtSearch = new System.Windows.Forms.TextBox();
             this.lblSearch = new System.Windows.Forms.Label();
             this.grpGrid = new System.Windows.Forms.GroupBox();
@@ -261,6 +262,7 @@ namespace HomeworkManager.Forms
             this.grpSearch.BackColor = System.Drawing.Color.White;
             this.grpSearch.Controls.Add(this.btnShowAll);
             this.grpSearch.Controls.Add(this.btnSearch);
+            this.grpSearch.Controls.Add(this.btnDarkMode);
             this.grpSearch.Controls.Add(this.txtSearch);
             this.grpSearch.Controls.Add(this.lblSearch);
             this.grpSearch.Font = new System.Drawing.Font("微軟正黑體", 10F, System.Drawing.FontStyle.Bold);
@@ -316,6 +318,21 @@ namespace HomeworkManager.Forms
             this.btnShowAll.TabIndex = 3;
             this.btnShowAll.Text = "顯示全部";
             this.btnShowAll.UseVisualStyleBackColor = false;
+            // 
+            // btnDarkMode
+            // 
+            this.btnDarkMode.BackColor = System.Drawing.Color.FromArgb(50, 50, 55);
+            this.btnDarkMode.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnDarkMode.FlatAppearance.BorderSize = 0;
+            this.btnDarkMode.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnDarkMode.Font = new System.Drawing.Font("微軟正黑體", 10F, System.Drawing.FontStyle.Bold);
+            this.btnDarkMode.ForeColor = System.Drawing.Color.White;
+            this.btnDarkMode.Location = new System.Drawing.Point(618, 20);
+            this.btnDarkMode.Name = "btnDarkMode";
+            this.btnDarkMode.Size = new System.Drawing.Size(120, 32);
+            this.btnDarkMode.TabIndex = 4;
+            this.btnDarkMode.Text = "🌙 深色模式";
+            this.btnDarkMode.UseVisualStyleBackColor = false;
             // 
             // grpGrid
             // 
@@ -409,6 +426,7 @@ namespace HomeworkManager.Forms
         private System.Windows.Forms.TextBox txtSearch;
         private System.Windows.Forms.Button btnSearch;
         private System.Windows.Forms.Button btnShowAll;
+        private System.Windows.Forms.Button btnDarkMode;
         private System.Windows.Forms.GroupBox grpGrid;
         private System.Windows.Forms.DataGridView dgvHomework;
         private System.Windows.Forms.Label lblStats;

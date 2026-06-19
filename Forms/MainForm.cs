@@ -13,11 +13,33 @@ namespace HomeworkManager.Forms
         private readonly HomeworkService _service;
         private string _selectedId = null;
         private bool _isLoading = false;
+        private bool _isDarkMode = false;
+
+        // ── 色票 ──────────────────────────────────────────────────────
+        // 淺色
+        private static readonly Color LightBg = Color.FromArgb(245, 247, 250);
+        private static readonly Color LightPanel = Color.White;
+        private static readonly Color LightFore = Color.Black;
+        private static readonly Color LightLabel = Color.FromArgb(30, 80, 160);
+        private static readonly Color LightStats = Color.FromArgb(80, 80, 80);
+        private static readonly Color LightGridHdr = Color.FromArgb(30, 80, 160);
+        private static readonly Color LightGridHdrFg = Color.White;
+        private static readonly Color LightGridBg = Color.White;
+        private static readonly Color LightGridLine = Color.FromArgb(220, 225, 235);
+        // 深色
+        private static readonly Color DarkBg = Color.FromArgb(30, 30, 30);
+        private static readonly Color DarkPanel = Color.FromArgb(45, 45, 48);
+        private static readonly Color DarkFore = Color.FromArgb(220, 220, 220);
+        private static readonly Color DarkLabel = Color.FromArgb(100, 160, 255);
+        private static readonly Color DarkStats = Color.FromArgb(180, 180, 180);
+        private static readonly Color DarkGridHdr = Color.FromArgb(60, 60, 65);
+        private static readonly Color DarkGridHdrFg = Color.FromArgb(220, 220, 220);
+        private static readonly Color DarkGridBg = Color.FromArgb(45, 45, 48);
+        private static readonly Color DarkGridLine = Color.FromArgb(70, 70, 75);
 
         public MainForm()
         {
             InitializeComponent();
-
             if (this.DesignMode) return;
 
             _service = new HomeworkService();
@@ -31,7 +53,6 @@ namespace HomeworkManager.Forms
                 dgvHomework.ClearSelection();
                 ClearInputs();
 
-                // 今日到期警告
                 var todayDue = _service.GetAll()
                     .Where(h => !h.IsCompleted && h.DueDate.Date == DateTime.Today)
                     .ToList();
@@ -57,6 +78,7 @@ namespace HomeworkManager.Forms
             this.btnClear.Click += BtnClear_Click;
             this.btnSearch.Click += BtnSearch_Click;
             this.btnShowAll.Click += BtnShowAll_Click;
+            this.btnDarkMode.Click += BtnDarkMode_Click;
             this.txtSearch.KeyDown += TxtSearch_KeyDown;
             this.dgvHomework.SelectionChanged += DgvHomework_SelectionChanged;
             this.dgvHomework.CellFormatting += DgvHomework_CellFormatting;
@@ -77,12 +99,10 @@ namespace HomeworkManager.Forms
                 Name = "colDue",
                 HeaderText = "截止日期",
                 DataPropertyName = "DueDate",
-                Width = 120,
+                Width = 110,
                 DefaultCellStyle = new DataGridViewCellStyle { Format = "yyyy/MM/dd" }
             });
             dgvHomework.Columns.Add(new DataGridViewTextBoxColumn { Name = "colStatus", HeaderText = "狀態", DataPropertyName = "StatusText", Width = 80 });
-
-            // 提醒欄自動填滿剩餘空間
             var colReminder = new DataGridViewTextBoxColumn { Name = "colReminder", HeaderText = "提醒", DataPropertyName = "ReminderText" };
             colReminder.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
             dgvHomework.Columns.Add(colReminder);
@@ -108,7 +128,85 @@ namespace HomeworkManager.Forms
             lblStats.Text = $"共 {total} 筆  |  已完成：{done}  |  未完成：{total - done}  |  今日到期：{dueToday}  |  已逾期：{overdue}";
         }
 
-        // ── CellFormatting (row colours) ──────────────────────────────
+        // ── Dark Mode ─────────────────────────────────────────────────
+        private void BtnDarkMode_Click(object sender, EventArgs e)
+        {
+            _isDarkMode = !_isDarkMode;
+            ApplyTheme();
+        }
+
+        private void ApplyTheme()
+        {
+            Color bg = _isDarkMode ? DarkBg : LightBg;
+            Color panel = _isDarkMode ? DarkPanel : LightPanel;
+            Color fore = _isDarkMode ? DarkFore : LightFore;
+            Color label = _isDarkMode ? DarkLabel : LightLabel;
+            Color stats = _isDarkMode ? DarkStats : LightStats;
+            Color gridHdr = _isDarkMode ? DarkGridHdr : LightGridHdr;
+            Color gridHdrFg = _isDarkMode ? DarkGridHdrFg : LightGridHdrFg;
+            Color gridBg = _isDarkMode ? DarkGridBg : LightGridBg;
+            Color gridLine = _isDarkMode ? DarkGridLine : LightGridLine;
+
+            // Form
+            this.BackColor = bg;
+
+            // 標題
+            lblTitle.ForeColor = label;
+
+            // GroupBox
+            foreach (var grp in new[] { grpInput, grpSearch, grpGrid })
+            {
+                grp.BackColor = panel;
+                grp.ForeColor = fore;
+            }
+
+            // Labels
+            foreach (var lbl in new Control[] { lblCourse, lblHwTitle, lblDueDate, lblContent, lblStatus, lblSearch })
+                lbl.ForeColor = fore;
+
+            lblStats.ForeColor = stats;
+
+            // TextBox
+            foreach (var txt in new[] { txtTitle, txtContent, txtSearch })
+            {
+                txt.BackColor = _isDarkMode ? Color.FromArgb(60, 60, 65) : Color.White;
+                txt.ForeColor = fore;
+            }
+
+            // ComboBox
+            foreach (var cmb in new[] { cmbCourse, cmbStatus })
+            {
+                cmb.BackColor = _isDarkMode ? Color.FromArgb(60, 60, 65) : Color.White;
+                cmb.ForeColor = fore;
+            }
+
+            // DateTimePicker
+            dtpDueDate.CalendarMonthBackground = panel;
+            dtpDueDate.CalendarForeColor = fore;
+            dtpDueDate.CalendarTitleBackColor = gridHdr;
+            dtpDueDate.CalendarTitleForeColor = gridHdrFg;
+
+            // Panel (buttons background)
+            pnlButtons.BackColor = panel;
+
+            // 深色模式按鈕文字
+            btnDarkMode.Text = _isDarkMode ? "☀️ 淺色模式" : "🌙 深色模式";
+
+            // DataGridView
+            dgvHomework.BackgroundColor = gridBg;
+            dgvHomework.GridColor = gridLine;
+            dgvHomework.DefaultCellStyle.BackColor = gridBg;
+            dgvHomework.DefaultCellStyle.ForeColor = fore;
+            dgvHomework.ColumnHeadersDefaultCellStyle.BackColor = gridHdr;
+            dgvHomework.ColumnHeadersDefaultCellStyle.ForeColor = gridHdrFg;
+            dgvHomework.ColumnHeadersDefaultCellStyle.Font =
+                new Font("微軟正黑體", 10F, FontStyle.Bold);
+
+            // 強制重繪資料列顏色
+            dgvHomework.Invalidate();
+        }
+
+        // ── CellFormatting ────────────────────────────────────────────
         private void DgvHomework_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             if (e.RowIndex < 0) return;
@@ -116,20 +214,38 @@ namespace HomeworkManager.Forms
             if (row.DataBoundItem is Homework hw)
             {
                 Color bg;
-                if (hw.IsCompleted)
-                    bg = Color.FromArgb(230, 255, 230);
-                else if (hw.DueDate.Date < DateTime.Today)
-                    bg = Color.FromArgb(255, 220, 220);
-                else if (hw.DueDate.Date == DateTime.Today)
-                    bg = Color.FromArgb(255, 245, 200);
-                else if ((hw.DueDate.Date - DateTime.Today).Days <= 3)
-                    bg = Color.FromArgb(255, 240, 210);
+                if (_isDarkMode)
+                {
+                    if (hw.IsCompleted)
+                        bg = Color.FromArgb(30, 70, 40);
+                    else if (hw.DueDate.Date < DateTime.Today)
+                        bg = Color.FromArgb(90, 30, 30);
+                    else if (hw.DueDate.Date == DateTime.Today)
+                        bg = Color.FromArgb(80, 70, 20);
+                    else if ((hw.DueDate.Date - DateTime.Today).Days <= 3)
+                        bg = Color.FromArgb(80, 55, 20);
+                    else
+                        bg = DarkGridBg;
+                }
                 else
-                    bg = Color.White;
+                {
+                    if (hw.IsCompleted)
+                        bg = Color.FromArgb(230, 255, 230);
+                    else if (hw.DueDate.Date < DateTime.Today)
+                        bg = Color.FromArgb(255, 220, 220);
+                    else if (hw.DueDate.Date == DateTime.Today)
+                        bg = Color.FromArgb(255, 245, 200);
+                    else if ((hw.DueDate.Date - DateTime.Today).Days <= 3)
+                        bg = Color.FromArgb(255, 240, 210);
+                    else
+                        bg = Color.White;
+                }
 
+                Color fg = _isDarkMode ? DarkFore : Color.Black;
                 row.DefaultCellStyle.BackColor = bg;
-                row.DefaultCellStyle.SelectionBackColor = Color.FromArgb(180, 210, 255);
-                row.DefaultCellStyle.SelectionForeColor = Color.Black;
+                row.DefaultCellStyle.ForeColor = fg;
+                row.DefaultCellStyle.SelectionBackColor = Color.FromArgb(80, 120, 200);
+                row.DefaultCellStyle.SelectionForeColor = Color.White;
             }
         }
 
@@ -155,7 +271,6 @@ namespace HomeworkManager.Forms
         private void BtnAdd_Click(object sender, EventArgs e)
         {
             if (!ValidateInput()) return;
-
             var hw = new Homework
             {
                 CourseName = cmbCourse.Text.Trim(),
@@ -172,13 +287,8 @@ namespace HomeworkManager.Forms
 
         private void BtnUpdate_Click(object sender, EventArgs e)
         {
-            if (_selectedId == null)
-            {
-                MessageBox.Show("請先在清單中選取要修改的作業。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            if (_selectedId == null) { MessageBox.Show("請先在清單中選取要修改的作業。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
             if (!ValidateInput()) return;
-
             var hw = new Homework
             {
                 Id = _selectedId,
@@ -196,14 +306,8 @@ namespace HomeworkManager.Forms
 
         private void BtnDelete_Click(object sender, EventArgs e)
         {
-            if (_selectedId == null)
-            {
-                MessageBox.Show("請先在清單中選取要刪除的作業。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-            var result = MessageBox.Show("確定要刪除這筆作業嗎？", "確認刪除",
-                MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (result == DialogResult.Yes)
+            if (_selectedId == null) { MessageBox.Show("請先在清單中選取要刪除的作業。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+            if (MessageBox.Show("確定要刪除這筆作業嗎？", "確認刪除", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 _service.Delete(_selectedId);
                 RefreshGrid(_service.GetAll());
@@ -213,11 +317,7 @@ namespace HomeworkManager.Forms
 
         private void BtnComplete_Click(object sender, EventArgs e)
         {
-            if (_selectedId == null)
-            {
-                MessageBox.Show("請先在清單中選取要標記完成的作業。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            if (_selectedId == null) { MessageBox.Show("請先在清單中選取要標記完成的作業。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
             _service.MarkCompleted(_selectedId);
             RefreshGrid(_service.GetAll());
             ClearInputs();
@@ -226,38 +326,17 @@ namespace HomeworkManager.Forms
 
         private void BtnClear_Click(object sender, EventArgs e) => ClearInputs();
 
-        private void BtnSearch_Click(object sender, EventArgs e)
-        {
-            var list = _service.Search(txtSearch.Text.Trim());
-            RefreshGrid(list);
-        }
+        private void BtnSearch_Click(object sender, EventArgs e) => RefreshGrid(_service.Search(txtSearch.Text.Trim()));
 
-        private void BtnShowAll_Click(object sender, EventArgs e)
-        {
-            txtSearch.Clear();
-            RefreshGrid(_service.GetAll());
-        }
+        private void BtnShowAll_Click(object sender, EventArgs e) { txtSearch.Clear(); RefreshGrid(_service.GetAll()); }
 
-        private void TxtSearch_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Enter) BtnSearch_Click(sender, e);
-        }
+        private void TxtSearch_KeyDown(object sender, KeyEventArgs e) { if (e.KeyCode == Keys.Enter) BtnSearch_Click(sender, e); }
 
         // ── Helpers ───────────────────────────────────────────────────
         private bool ValidateInput()
         {
-            if (string.IsNullOrWhiteSpace(cmbCourse.Text))
-            {
-                MessageBox.Show("請填寫課程名稱。", "驗證失敗", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                cmbCourse.Focus();
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(txtTitle.Text))
-            {
-                MessageBox.Show("請填寫作業標題。", "驗證失敗", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtTitle.Focus();
-                return false;
-            }
+            if (string.IsNullOrWhiteSpace(cmbCourse.Text)) { MessageBox.Show("請填寫課程名稱。", "驗證失敗", MessageBoxButtons.OK, MessageBoxIcon.Warning); cmbCourse.Focus(); return false; }
+            if (string.IsNullOrWhiteSpace(txtTitle.Text)) { MessageBox.Show("請填寫作業標題。", "驗證失敗", MessageBoxButtons.OK, MessageBoxIcon.Warning); txtTitle.Focus(); return false; }
             return true;
         }
 
