@@ -46,13 +46,25 @@ namespace HomeworkManager.Forms.Pages
                 BackColor = Color.Transparent,
                 Padding = new Padding(16)
             };
-            tbl.RowStyles.Add(new RowStyle(SizeType.Absolute, 340)); // 輸入+搜尋
+            tbl.RowStyles.Add(new RowStyle(SizeType.Absolute, 348)); // 輸入+搜尋
             tbl.RowStyles.Add(new RowStyle(SizeType.Percent, 100));  // 清單
 
             // ── 上方：輸入 + 搜尋 ────────────────────────────────────
             var pnlTop = new Panel { Dock = DockStyle.Fill, BackColor = Color.Transparent };
 
-            // 作業資料 GroupBox
+            // 搜尋 GroupBox（先加 = 顯示在上方）
+            var grpSearch = MakeGroup("🔍 搜尋");
+            grpSearch.Dock = DockStyle.Top;
+            grpSearch.Height = 72;
+            grpSearch.Controls.Add(MakeLabel("搜尋：", new Point(12, 28)));
+            txtSearch = new TextBox { Location = new Point(70, 26), Size = new Size(300, 28), BackColor = MainShell.ThemePanel, ForeColor = MainShell.ThemeFore };
+            txtSearch.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) DoSearch(); };
+            grpSearch.Controls.Add(txtSearch);
+            grpSearch.Controls.Add(MakeBtnAt("搜尋", Color.FromArgb(0, 123, 255), new Point(380, 20), (s, e) => DoSearch()));
+            grpSearch.Controls.Add(MakeBtnAt("顯示全部", Color.FromArgb(108, 117, 125), new Point(498, 20), (s, e) => { txtSearch.Clear(); RefreshGrid(_service.GetAll()); }));
+            pnlTop.Controls.Add(grpSearch);
+
+            // 作業資料 GroupBox（後加 = 顯示在下方，Dock=Top 反序）
             var grpInput = MakeGroup("✏️ 作業資料");
             grpInput.Dock = DockStyle.Top;
             grpInput.Height = 258;
@@ -93,19 +105,6 @@ namespace HomeworkManager.Forms.Pages
             grpInput.Controls.Add(pnlBtn);
 
             pnlTop.Controls.Add(grpInput);
-
-            // 搜尋 GroupBox
-            var grpSearch = MakeGroup("🔍 搜尋");
-            grpSearch.Dock = DockStyle.Top;
-            grpSearch.Height = 64;
-            grpSearch.Controls.Add(MakeLabel("搜尋：", new Point(12, 28)));
-            txtSearch = new TextBox { Location = new Point(70, 26), Size = new Size(300, 28), BackColor = MainShell.ThemePanel, ForeColor = MainShell.ThemeFore };
-            txtSearch.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) DoSearch(); };
-            grpSearch.Controls.Add(txtSearch);
-            grpSearch.Controls.Add(MakeBtnAt("搜尋", Color.FromArgb(0, 123, 255), new Point(380, 20), (s, e) => DoSearch()));
-            grpSearch.Controls.Add(MakeBtnAt("顯示全部", Color.FromArgb(108, 117, 125), new Point(498, 20), (s, e) => { txtSearch.Clear(); RefreshGrid(_service.GetAll()); }));
-            pnlTop.Controls.Add(grpSearch);
-
             tbl.Controls.Add(pnlTop, 0, 0);
 
             // ── 下方：作業清單 ────────────────────────────────────────

@@ -28,11 +28,7 @@ namespace HomeworkManager.Forms
             _service = new HomeworkService();
             BuildSidebar();
 
-            this.Load += (s, e) =>
-            {
-                NavigateTo("dashboard");
-                CheckTodayDue();
-            };
+            this.Load += (s, e) => NavigateTo("dashboard");
         }
 
         // ── Sidebar ───────────────────────────────────────────────────

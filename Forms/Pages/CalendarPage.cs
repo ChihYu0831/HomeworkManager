@@ -49,7 +49,7 @@ namespace HomeworkManager.Forms.Pages
                 Padding = new Padding(16)
             };
             tblLeft.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));   // 列0：標題
-            tblLeft.RowStyles.Add(new RowStyle(SizeType.Absolute, 260));  // 列1：月曆
+            tblLeft.RowStyles.Add(new RowStyle(SizeType.Absolute, 240));  // 列1：月曆
             tblLeft.RowStyles.Add(new RowStyle(SizeType.Percent, 100));   // 列2：圖例
 
             // 列0：標題
@@ -68,7 +68,12 @@ namespace HomeworkManager.Forms.Pages
                 MaxSelectionCount = 1,
                 ShowToday = true,
                 Font = new Font("微軟正黑體", 11F),
-                Dock = DockStyle.Fill
+                Dock = DockStyle.Fill,
+                CalendarDimensions = new Size(1, 1),
+                TitleBackColor = Color.FromArgb(28, 55, 110),
+                TitleForeColor = Color.White,
+                TrailingForeColor = Color.FromArgb(180, 180, 180),
+                ForeColor = Color.FromArgb(30, 30, 30)
             };
             cal.DateSelected += Cal_DateSelected;
 
