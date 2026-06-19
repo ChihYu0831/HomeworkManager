@@ -147,6 +147,7 @@ namespace HomeworkManager.Forms.Pages
 
             dgv.SelectionChanged += Dgv_SelectionChanged;
             dgv.CellFormatting += Dgv_CellFormatting;
+            dgv.DataBindingComplete += (s, e) => { dgv.CurrentCell = null; dgv.ClearSelection(); };
 
             lblStats = new Label { Dock = DockStyle.Bottom, Height = 26, ForeColor = MainShell.ThemeMuted, Font = new Font("微軟正黑體", 9F), Padding = new Padding(4, 4, 0, 0) };
 
