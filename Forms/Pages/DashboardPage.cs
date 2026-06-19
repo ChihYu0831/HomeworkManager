@@ -35,7 +35,6 @@ namespace HomeworkManager.Forms.Pages
             var todayList = all.Where(h => !h.IsCompleted && h.DueDate.Date == DateTime.Today).ToList();
             var soonList = all.Where(h => !h.IsCompleted && h.DueDate.Date > DateTime.Today && h.DueDate.Date <= DateTime.Today.AddDays(7)).OrderBy(h => h.DueDate).ToList();
 
-            // 主 TableLayoutPanel：5列
             var tbl = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -43,112 +42,105 @@ namespace HomeworkManager.Forms.Pages
                 RowCount = 5,
                 BackColor = Color.Transparent
             };
+            int soonH = 36 + 28 + Math.Max(soonList.Count, 1) * 30 + 20;
+            int todayH = 36 + 28 + Math.Max(todayList.Count, 1) * 30 + 20;
+            tbl.RowStyles.Add(new RowStyle(SizeType.Absolute, soonH));
+            tbl.RowStyles.Add(new RowStyle(SizeType.Absolute, 12));
+            tbl.RowStyles.Add(new RowStyle(SizeType.Absolute, todayH));
+            tbl.RowStyles.Add(new RowStyle(SizeType.Absolute, 12));
+            tbl.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
-            int todayH = 60 + Math.Max(todayList.Count, 1) * 32;
-            int soonH = 60 + Math.Max(soonList.Count, 1) * 32;
-            int progH = 100;
-            int cardH = 130;
-
-            tbl.RowStyles.Add(new RowStyle(SizeType.Absolute, soonH));   // 0: 7天內
-            tbl.RowStyles.Add(new RowStyle(SizeType.Absolute, todayH));  // 1: 今日到期
-            tbl.RowStyles.Add(new RowStyle(SizeType.Absolute, progH));   // 2: 完成率
-            tbl.RowStyles.Add(new RowStyle(SizeType.Absolute, cardH));   // 3: 卡片
-            tbl.RowStyles.Add(new RowStyle(SizeType.Percent, 100));      // 4: 空白
-
-            // ── 列0：7天內到期 ────────────────────────────────────────
-            var pnlSoon = MakeSection($"🟡 7天內即將到期（{soonList.Count} 筆）");
+            // ── 7天內到期 ─────────────────────────────────────────────
+            Panel pnlSoon;
             if (soonList.Count == 0)
-                pnlSoon.Controls.Add(new Label { Text = "近7天沒有即將到期的作業 👍", ForeColor = MainShell.ThemeMuted, Dock = DockStyle.Fill, Font = new Font("微軟正黑體", 10F), TextAlign = ContentAlignment.MiddleLeft, Padding = new Padding(14, 0, 0, 0) });
+            {
+                pnlSoon = BuildSection($"🟡 7天內即將到期（0 筆）", null, "近7天沒有即將到期的作業 👍");
+            }
             else
             {
-                var dgv = MakeMiniGrid();
-                dgv.DataSource = soonList;
-                pnlSoon.Controls.Add(dgv);
+                var dgvSoon = MakeMiniGrid();
+                dgvSoon.DataSource = soonList;
+                pnlSoon = BuildSection($"🟡 7天內即將到期（{soonList.Count} 筆）", dgvSoon, null);
             }
             tbl.Controls.Add(pnlSoon, 0, 0);
+            tbl.Controls.Add(new Panel { BackColor = Color.Transparent }, 0, 1);
 
-            // ── 列1：今日到期 ─────────────────────────────────────────
-            var pnlToday = MakeSection($"🔴 今日到期（{todayList.Count} 筆）");
+            // ── 今日到期 ──────────────────────────────────────────────
+            Panel pnlToday;
             if (todayList.Count == 0)
-                pnlToday.Controls.Add(new Label { Text = "今天沒有到期作業 🎉", ForeColor = MainShell.ThemeMuted, Dock = DockStyle.Fill, Font = new Font("微軟正黑體", 10F), TextAlign = ContentAlignment.MiddleLeft, Padding = new Padding(14, 0, 0, 0) });
+            {
+                pnlToday = BuildSection("🔴 今日到期（0 筆）", null, "今天沒有到期作業 🎉");
+            }
             else
             {
-                var dgv = MakeMiniGrid();
-                dgv.DataSource = todayList;
-                pnlToday.Controls.Add(dgv);
+                var dgvToday = MakeMiniGrid();
+                dgvToday.DataSource = todayList;
+                pnlToday = BuildSection($"🔴 今日到期（{todayList.Count} 筆）", dgvToday, null);
             }
-            tbl.Controls.Add(pnlToday, 0, 1);
+            tbl.Controls.Add(pnlToday, 0, 2);
+            tbl.Controls.Add(new Panel { BackColor = Color.Transparent }, 0, 3);
 
-            // ── 列2：完成率 ───────────────────────────────────────────
-            var pnlProg = MakeSection("📈 完成率");
-            var lblRate = new Label
-            {
-                Text = $"{rate:F1}%  （{done} / {total} 筆已完成）",
-                Font = new Font("微軟正黑體", 11F, FontStyle.Bold),
-                ForeColor = MainShell.ThemeFore,
-                Location = new Point(14, 34),
-                AutoSize = true
-            };
-            var pb = new ProgressBar
-            {
-                Minimum = 0,
-                Maximum = 100,
-                Value = (int)rate,
-                Location = new Point(14, 62),
-                Size = new Size(700, 22),
-                Style = ProgressBarStyle.Continuous
-            };
-            pnlProg.Controls.Add(lblRate);
-            pnlProg.Controls.Add(pb);
-            tbl.Controls.Add(pnlProg, 0, 2);
-
-            // ── 列3：統計卡片 ─────────────────────────────────────────
-            var pnlCards = new FlowLayoutPanel
+            // ── 完成率 + 卡片 ─────────────────────────────────────────
+            var pnlBottom = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
-                FlowDirection = FlowDirection.LeftToRight,
-                WrapContents = false,
-                BackColor = Color.Transparent,
-                Padding = new Padding(0, 8, 0, 0)
+                ColumnCount = 1,
+                RowCount = 2,
+                BackColor = Color.Transparent
             };
+            pnlBottom.RowStyles.Add(new RowStyle(SizeType.Absolute, 100));
+            pnlBottom.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+
+            var pnlProg = new Panel { Dock = DockStyle.Fill, BackColor = MainShell.ThemePanel, Padding = new Padding(14, 8, 14, 8) };
+            var lblProgTitle = new Label { Text = "📈 完成率", Font = new Font("微軟正黑體", 11F, FontStyle.Bold), ForeColor = MainShell.ThemeFore, Location = new Point(14, 8), Size = new Size(200, 28) };
+            var lblProgVal = new Label { Text = string.Format("{0:F1}%  （{1} / {2} 筆已完成）", rate, done, total), Font = new Font("微軟正黑體", 10F), ForeColor = MainShell.ThemeFore, Location = new Point(14, 38), Size = new Size(400, 24) };
+            var pb = new ProgressBar { Minimum = 0, Maximum = 100, Value = (int)rate, Location = new Point(14, 66), Size = new Size(700, 22), Style = ProgressBarStyle.Continuous };
+            pnlProg.Controls.Add(lblProgTitle);
+            pnlProg.Controls.Add(lblProgVal);
+            pnlProg.Controls.Add(pb);
+            pnlBottom.Controls.Add(pnlProg, 0, 0);
+
+            var pnlCards = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.LeftToRight, WrapContents = false, BackColor = Color.Transparent, Padding = new Padding(0, 10, 0, 0) };
             pnlCards.Controls.Add(MakeCard("📚 總作業數", total.ToString(), MainShell.ThemeAccent));
             pnlCards.Controls.Add(MakeCard("✅ 已完成", done.ToString(), Color.FromArgb(34, 160, 90)));
             pnlCards.Controls.Add(MakeCard("⛔ 已逾期", overdue.ToString(), Color.FromArgb(210, 55, 55)));
             pnlCards.Controls.Add(MakeCard("🔴 今天到期", today.ToString(), Color.FromArgb(220, 140, 20)));
             pnlCards.Controls.Add(MakeCard("🟡 7天內到期", week.ToString(), Color.FromArgb(160, 100, 20)));
-            tbl.Controls.Add(pnlCards, 0, 3);
+            pnlBottom.Controls.Add(pnlCards, 0, 1);
 
-            // 列4：空白
-            tbl.Controls.Add(new Panel { Dock = DockStyle.Fill, BackColor = Color.Transparent }, 0, 4);
-
+            tbl.Controls.Add(pnlBottom, 0, 4);
             this.Controls.Add(tbl);
         }
 
-        private Panel MakeSection(string title)
+        private Panel BuildSection(string title, DataGridView dgv, string emptyText)
         {
-            var pnl = new Panel { Dock = DockStyle.Fill, BackColor = MainShell.ThemePanel, Margin = new Padding(0, 0, 0, 10) };
-            var lbl = new Label
+            var tbl = new TableLayoutPanel
             {
-                Text = title,
-                Font = new Font("微軟正黑體", 11F, FontStyle.Bold),
-                ForeColor = MainShell.ThemeFore,
-                Dock = DockStyle.Top,
-                Height = 36,
-                Padding = new Padding(14, 8, 0, 0)
+                Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 2,
+                BackColor = MainShell.ThemePanel
             };
-            pnl.Controls.Add(lbl);
+            tbl.RowStyles.Add(new RowStyle(SizeType.Absolute, 36));
+            tbl.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            tbl.Controls.Add(new Label { Text = title, Font = new Font("微軟正黑體", 11F, FontStyle.Bold), ForeColor = MainShell.ThemeFore, Dock = DockStyle.Fill, Padding = new Padding(14, 6, 0, 0) }, 0, 0);
+
+            if (dgv != null)
+                tbl.Controls.Add(dgv, 0, 1);
+            else
+                tbl.Controls.Add(new Label { Text = emptyText, ForeColor = MainShell.ThemeMuted, Font = new Font("微軟正黑體", 10F), Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, Padding = new Padding(14, 0, 0, 0) }, 0, 1);
+
+            var pnl = new Panel { Dock = DockStyle.Fill, BackColor = MainShell.ThemePanel };
+            pnl.Controls.Add(tbl);
             return pnl;
         }
 
         private Panel MakeCard(string title, string value, Color accent)
         {
             var pnl = new Panel { Width = 170, Height = 110, Margin = new Padding(0, 0, 16, 0), BackColor = MainShell.ThemePanel };
-            var bar = new Panel { Dock = DockStyle.Top, Height = 5, BackColor = accent };
-            var lblVal = new Label { Text = value, Font = new Font("微軟正黑體", 26F, FontStyle.Bold), ForeColor = accent, TextAlign = ContentAlignment.MiddleCenter, Dock = DockStyle.Fill };
-            var lblTit = new Label { Text = title, Font = new Font("微軟正黑體", 9.5F), ForeColor = MainShell.ThemeMuted, TextAlign = ContentAlignment.MiddleCenter, Dock = DockStyle.Bottom, Height = 28 };
-            pnl.Controls.Add(lblVal);
-            pnl.Controls.Add(lblTit);
-            pnl.Controls.Add(bar);
+            pnl.Controls.Add(new Panel { Dock = DockStyle.Top, Height = 5, BackColor = accent });
+            pnl.Controls.Add(new Label { Text = value, Font = new Font("微軟正黑體", 26F, FontStyle.Bold), ForeColor = accent, TextAlign = ContentAlignment.MiddleCenter, Dock = DockStyle.Fill });
+            pnl.Controls.Add(new Label { Text = title, Font = new Font("微軟正黑體", 9.5F), ForeColor = MainShell.ThemeMuted, TextAlign = ContentAlignment.MiddleCenter, Dock = DockStyle.Bottom, Height = 28 });
             return pnl;
         }
 
@@ -170,13 +162,13 @@ namespace HomeworkManager.Forms.Pages
                 Font = new Font("微軟正黑體", 9.5F),
                 AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
                 EnableHeadersVisualStyles = false,
-                ColumnHeadersHeight = 30,
+                ColumnHeadersHeight = 28,
                 RowTemplate = { Height = 28 },
                 TabStop = false
             };
             dgv.ColumnHeadersDefaultCellStyle.BackColor = MainShell.ThemeAccent;
             dgv.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
-            dgv.ColumnHeadersDefaultCellStyle.Font = new Font("微軟正黑體", 10F, FontStyle.Bold);
+            dgv.ColumnHeadersDefaultCellStyle.Font = new Font("微軟正黑體", 9.5F, FontStyle.Bold);
             dgv.DefaultCellStyle.BackColor = MainShell.ThemePanel;
             dgv.DefaultCellStyle.ForeColor = MainShell.ThemeFore;
 

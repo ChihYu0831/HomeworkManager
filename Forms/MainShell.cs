@@ -101,7 +101,7 @@ namespace HomeworkManager.Forms
                 case "calendar": return "行事曆";
                 case "stats": return "統計分析";
                 case "settings": return "設定";
-                default: return "首頁 Dashboard";
+                default: return "首頁";
             }
         }
 
