@@ -16,8 +16,10 @@ namespace HomeworkManager.Forms
         public MainForm()
         {
             InitializeComponent();
-            _service = new HomeworkService();
 
+            if (this.DesignMode) return;
+
+            _service = new HomeworkService();
             dtpDueDate.MinDate = DateTime.Today;
             WireEvents();
             SetupGrid();
@@ -110,7 +112,7 @@ namespace HomeworkManager.Forms
                 cmbCourse.Text = hw.CourseName;
                 txtTitle.Text = hw.Title;
                 txtContent.Text = hw.Content;
-                dtpDueDate.MinDate = DateTime.MinValue;
+                dtpDueDate.MinDate = new DateTime(2000, 1, 1);
                 dtpDueDate.Value = hw.DueDate;
                 dtpDueDate.MinDate = DateTime.Today;
                 cmbStatus.SelectedIndex = hw.IsCompleted ? 1 : 0;
