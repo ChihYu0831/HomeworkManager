@@ -26,48 +26,70 @@ namespace HomeworkManager.Forms.Pages
 
         private void Build()
         {
-            var tbl = new TableLayoutPanel
+            // 主分割：左欄固定寬 / 右欄填滿
+            var tblMain = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
                 ColumnCount = 2,
                 RowCount = 1,
                 BackColor = Color.Transparent,
-                Padding = new Padding(16),
-                CellBorderStyle = TableLayoutPanelCellBorderStyle.None
+                Padding = new Padding(16)
             };
-            tbl.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 400));
-            tbl.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            tbl.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            tblMain.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 380));
+            tblMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            tblMain.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
-            // ── 左欄 ─────────────────────────────────────────────────
-            var pnlLeft = new Panel { Dock = DockStyle.Fill, BackColor = MainShell.ThemePanel, Padding = new Padding(16, 12, 16, 16) };
-
-            // 月曆（Dock=Top，最先加入 = 最上面）
-            cal = new MonthCalendar
+            // ── 左欄：TableLayoutPanel 分三列 ────────────────────────
+            var tblLeft = new TableLayoutPanel
             {
-                MaxSelectionCount = 1,
-                ShowToday = true,
-                Font = new Font("微軟正黑體", 11F),
-                Dock = DockStyle.Top,
-                Height = 260
+                Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 3,
+                BackColor = MainShell.ThemePanel,
+                Padding = new Padding(16)
             };
-            cal.DateSelected += Cal_DateSelected;
+            tblLeft.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));   // 列0：標題
+            tblLeft.RowStyles.Add(new RowStyle(SizeType.Absolute, 260));  // 列1：月曆
+            tblLeft.RowStyles.Add(new RowStyle(SizeType.Percent, 100));   // 列2：圖例
 
-            // 月曆標題（Dock=Top，第二個加入 = 在月曆下面）
+            // 列0：標題
             var lblCalTitle = new Label
             {
                 Text = "📅 月曆",
                 Font = new Font("微軟正黑體", 11F, FontStyle.Bold),
                 ForeColor = MainShell.ThemeFore,
-                Dock = DockStyle.Top,
-                Height = 32
+                Dock = DockStyle.Fill,
+                TextAlign = System.Drawing.ContentAlignment.MiddleLeft
             };
 
-            // 圖例（Dock=Top，最後加入 = 在最下面）
-            var pnlLegend = new Panel { Dock = DockStyle.Top, Height = 114, BackColor = Color.Transparent, Padding = new Padding(0, 8, 0, 0) };
-            var legendTitle = new Label { Text = "顏色說明", Font = new Font("微軟正黑體", 10F, FontStyle.Bold), ForeColor = MainShell.ThemeFore, Location = new Point(0, 0), Size = new Size(300, 24) };
-            pnlLegend.Controls.Add(legendTitle);
-            int ly = 26;
+            // 列1：月曆
+            cal = new MonthCalendar
+            {
+                MaxSelectionCount = 1,
+                ShowToday = true,
+                Font = new Font("微軟正黑體", 11F),
+                Dock = DockStyle.Fill
+            };
+            cal.DateSelected += Cal_DateSelected;
+
+            // 列2：圖例
+            var tblLegend = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 5,
+                BackColor = Color.Transparent,
+                Padding = new Padding(0, 10, 0, 0)
+            };
+            tblLegend.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
+            tblLegend.RowStyles.Add(new RowStyle(SizeType.Absolute, 24));
+            tblLegend.RowStyles.Add(new RowStyle(SizeType.Absolute, 24));
+            tblLegend.RowStyles.Add(new RowStyle(SizeType.Absolute, 24));
+            tblLegend.RowStyles.Add(new RowStyle(SizeType.Absolute, 24));
+
+            tblLegend.Controls.Add(new Label { Text = "顏色說明", Font = new Font("微軟正黑體", 10F, FontStyle.Bold), ForeColor = MainShell.ThemeFore, Dock = DockStyle.Fill }, 0, 0);
+
+            int row = 1;
             foreach (var (icon, text, color) in new (string, string, Color)[] {
                 ("🟡", "今天到期",      Color.FromArgb(180, 130, 0)),
                 ("🔴", "已逾期",        Color.FromArgb(210, 55, 55)),
@@ -75,25 +97,33 @@ namespace HomeworkManager.Forms.Pages
                 ("●",  "粗體 = 有作業", MainShell.ThemeMuted)
             })
             {
-                pnlLegend.Controls.Add(new Label { Text = $"  {icon}  {text}", Font = new Font("微軟正黑體", 9.5F), ForeColor = color, Location = new Point(0, ly), Size = new Size(300, 22) });
-                ly += 22;
+                tblLegend.Controls.Add(new Label { Text = $"  {icon}  {text}", Font = new Font("微軟正黑體", 9.5F), ForeColor = color, Dock = DockStyle.Fill, TextAlign = System.Drawing.ContentAlignment.MiddleLeft }, 0, row++);
             }
 
-            pnlLeft.Controls.Add(cal);
-            pnlLeft.Controls.Add(lblCalTitle);
-            pnlLeft.Controls.Add(pnlLegend);
-            tbl.Controls.Add(pnlLeft, 0, 0);
+            tblLeft.Controls.Add(lblCalTitle, 0, 0);
+            tblLeft.Controls.Add(cal, 0, 1);
+            tblLeft.Controls.Add(tblLegend, 0, 2);
+            tblMain.Controls.Add(tblLeft, 0, 0);
 
-            // ── 右欄 ─────────────────────────────────────────────────
-            var pnlRight = new Panel { Dock = DockStyle.Fill, BackColor = MainShell.ThemePanel, Padding = new Padding(16) };
+            // ── 右欄：標題 + DataGridView ─────────────────────────────
+            var tblRight = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 2,
+                BackColor = MainShell.ThemePanel,
+                Padding = new Padding(16)
+            };
+            tblRight.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
+            tblRight.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
             lblDayTitle = new Label
             {
                 Text = "👆 請點選左側日期查看作業",
                 Font = new Font("微軟正黑體", 13F, FontStyle.Bold),
                 ForeColor = MainShell.ThemeFore,
-                Dock = DockStyle.Top,
-                Height = 42
+                Dock = DockStyle.Fill,
+                TextAlign = System.Drawing.ContentAlignment.MiddleLeft
             };
 
             dgvDay = new DataGridView
@@ -125,15 +155,14 @@ namespace HomeworkManager.Forms.Pages
             dgvDay.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "作業標題", DataPropertyName = "Title", FillWeight = 34 });
             dgvDay.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "狀態", DataPropertyName = "StatusText", FillWeight = 18 });
 
-            // 顏色依「今天」計算，不是點選的日期
             dgvDay.CellFormatting += DgvDay_CellFormatting;
             dgvDay.DataBindingComplete += (s, e) => { dgvDay.CurrentCell = null; dgvDay.ClearSelection(); };
 
-            pnlRight.Controls.Add(dgvDay);
-            pnlRight.Controls.Add(lblDayTitle);
-            tbl.Controls.Add(pnlRight, 1, 0);
+            tblRight.Controls.Add(lblDayTitle, 0, 0);
+            tblRight.Controls.Add(dgvDay, 0, 1);
+            tblMain.Controls.Add(tblRight, 1, 0);
 
-            this.Controls.Add(tbl);
+            this.Controls.Add(tblMain);
         }
 
         private void HighlightDueDates()
@@ -163,18 +192,17 @@ namespace HomeworkManager.Forms.Pages
             var row = dgvDay.Rows[e.RowIndex];
             if (row.DataBoundItem is Homework hw)
             {
-                // 顏色依今天（DateTime.Today）計算，跟點選哪天無關
                 Color bg;
                 if (hw.IsCompleted)
                     bg = Color.FromArgb(225, 255, 225);
                 else if (hw.DueDate.Date < DateTime.Today)
-                    bg = Color.FromArgb(255, 218, 218);   // 逾期：紅
+                    bg = Color.FromArgb(255, 218, 218);
                 else if (hw.DueDate.Date == DateTime.Today)
-                    bg = Color.FromArgb(255, 245, 195);   // 今天：黃
+                    bg = Color.FromArgb(255, 245, 195);
                 else if ((hw.DueDate.Date - DateTime.Today).Days <= 3)
-                    bg = Color.FromArgb(255, 235, 200);   // 3天內：淡橘
+                    bg = Color.FromArgb(255, 235, 200);
                 else
-                    bg = MainShell.ThemePanel;             // 正常：白
+                    bg = MainShell.ThemePanel;
 
                 row.DefaultCellStyle.BackColor = bg;
                 row.DefaultCellStyle.ForeColor = MainShell.ThemeFore;

@@ -195,6 +195,7 @@ namespace HomeworkManager.Forms.Pages
             dgv.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "截止日期", DataPropertyName = "DueDate", FillWeight = 20, DefaultCellStyle = new DataGridViewCellStyle { Format = "yyyy/MM/dd" } });
             dgv.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "提醒", DataPropertyName = "ReminderText", FillWeight = 20 });
             dgv.DataBindingComplete += (s, e) => { dgv.CurrentCell = null; dgv.ClearSelection(); };
+            dgv.CellFormatting += (s, e) => { }; // force repaint
             return dgv;
         }
     }

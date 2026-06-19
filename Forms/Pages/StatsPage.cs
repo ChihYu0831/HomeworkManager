@@ -16,69 +16,71 @@ namespace HomeworkManager.Forms.Pages
         public StatsPage(HomeworkService service, MainShell shell)
         {
             _service = service;
-            _shell   = shell;
-            this.Padding   = new Padding(24);
+            _shell = shell;
             this.BackColor = MainShell.ThemeBg;
             Build();
         }
 
         private void Build()
         {
-            var all   = _service.GetAll();
+            var all = _service.GetAll();
             int total = all.Count;
-            int done  = all.Count(h => h.IsCompleted);
+            int done = all.Count(h => h.IsCompleted);
             int undone = total - done;
+            double rate = total == 0 ? 0 : (double)done / total * 100;
 
-            // ── 完成率圓形圖（手繪）──────────────────────────────────
+            var tbl = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 2,
+                BackColor = Color.Transparent,
+                Padding = new Padding(20)
+            };
+            tbl.RowStyles.Add(new RowStyle(SizeType.Absolute, 220));
+            tbl.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+
+            // ── 完成率圓形圖 ──────────────────────────────────────────
             var grpPie = MakeGroup("📊 完成率");
-            grpPie.Dock   = DockStyle.Top;
-            grpPie.Height = 220;
+            grpPie.Dock = DockStyle.Fill;
 
-            var picPie = new PictureBox { Location = new Point(16, 32), Size = new Size(180, 160), BackColor = Color.Transparent };
+            var picPie = new PictureBox { Location = new Point(16, 36), Size = new Size(170, 160), BackColor = Color.Transparent };
             picPie.Paint += (s, e) => DrawPie(e.Graphics, picPie.Size, done, undone);
 
-            var lblDone   = MakeStatLabel($"✅ 已完成：{done} 筆",   Color.FromArgb(34, 160, 90),  new Point(210, 50));
-            var lblUndone = MakeStatLabel($"🔲 未完成：{undone} 筆", MainShell.ThemeAccent,        new Point(210, 90));
-            var lblRate   = MakeStatLabel($"完成率：{(total == 0 ? 0 : done * 100.0 / total):F1}%", MainShell.ThemeFore, new Point(210, 130));
-            lblRate.Font  = new Font("微軟正黑體", 14F, FontStyle.Bold);
-
             grpPie.Controls.Add(picPie);
-            grpPie.Controls.Add(lblDone);
-            grpPie.Controls.Add(lblUndone);
+            grpPie.Controls.Add(MakeStatLabel($"✅ 已完成：{done} 筆", Color.FromArgb(34, 160, 90), new Point(204, 50)));
+            grpPie.Controls.Add(MakeStatLabel($"🔲 未完成：{undone} 筆", MainShell.ThemeAccent, new Point(204, 90)));
+            var lblRate = MakeStatLabel($"完成率：{rate:F1}%", MainShell.ThemeFore, new Point(204, 134));
+            lblRate.Font = new Font("微軟正黑體", 15F, FontStyle.Bold);
             grpPie.Controls.Add(lblRate);
-            this.Controls.Add(grpPie);
 
-            // ── 各課程作業數量長條圖 ────────────────────────────────
+            tbl.Controls.Add(grpPie, 0, 0);
+
+            // ── 各課程長條圖 ──────────────────────────────────────────
             var grpBar = MakeGroup("📚 各課程作業數量");
-            grpBar.Dock   = DockStyle.Fill;
+            grpBar.Dock = DockStyle.Fill;
 
             var groups = all.GroupBy(h => h.CourseName)
                             .Select(g => new { Course = g.Key, Total = g.Count(), Done = g.Count(h => h.IsCompleted) })
-                            .OrderByDescending(g => g.Total)
-                            .ToList();
+                            .OrderByDescending(g => g.Total).ToList();
 
             var picBar = new PictureBox { Dock = DockStyle.Fill, BackColor = Color.Transparent };
             picBar.Paint += (s, e) => DrawBars(e.Graphics, picBar.Size, groups.Select(g => (g.Course, g.Total, g.Done)).ToList());
-
             grpBar.Controls.Add(picBar);
-            this.Controls.Add(grpBar);
+
+            tbl.Controls.Add(grpBar, 0, 1);
+            this.Controls.Add(tbl);
         }
 
         private void DrawPie(Graphics g, Size size, int done, int undone)
         {
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             int total = done + undone;
-            var rect  = new Rectangle(10, 10, size.Width - 20, size.Height - 20);
-
-            if (total == 0)
-            {
-                g.FillEllipse(new SolidBrush(Color.FromArgb(200, 200, 200)), rect);
-                return;
-            }
-
+            var rect = new Rectangle(8, 8, size.Width - 16, size.Height - 16);
+            if (total == 0) { g.FillEllipse(new SolidBrush(Color.FromArgb(200, 200, 200)), rect); return; }
             float doneAngle = 360f * done / total;
             g.FillPie(new SolidBrush(Color.FromArgb(34, 160, 90)), rect, -90, doneAngle);
-            g.FillPie(new SolidBrush(MainShell.ThemeAccent),        rect, -90 + doneAngle, 360 - doneAngle);
+            g.FillPie(new SolidBrush(MainShell.ThemeAccent), rect, -90 + doneAngle, 360 - doneAngle);
             g.DrawEllipse(new Pen(MainShell.ThemePanel, 3), rect);
         }
 
@@ -88,55 +90,56 @@ namespace HomeworkManager.Forms.Pages
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
-            int maxVal   = data.Max(d => d.total);
-            int barH     = Math.Min(36, (size.Height - 40) / Math.Max(data.Count, 1));
-            int labelW   = 180;
-            int chartW   = size.Width - labelW - 80;
-            int startY   = 20;
-            var fontLbl  = new Font("微軟正黑體", 9F);
-            var fontNum  = new Font("微軟正黑體", 9F, FontStyle.Bold);
-            var brushFg  = new SolidBrush(MainShell.ThemeFore);
+            int maxVal = data.Max(d => d.total);
+            int barH = Math.Min(34, (size.Height - 50) / Math.Max(data.Count, 1));
+            int labelW = 200;
+            int chartW = size.Width - labelW - 70;
+            int startY = 16;
+            var fontLbl = new Font("微軟正黑體", 9F);
+            var fontNum = new Font("微軟正黑體", 9F, FontStyle.Bold);
+            var brushFg = new SolidBrush(MainShell.ThemeFore);
 
             for (int i = 0; i < data.Count; i++)
             {
                 var (course, total, done) = data[i];
                 int y = startY + i * (barH + 10);
 
-                // label
                 g.DrawString(course, fontLbl, brushFg, new RectangleF(0, y + 4, labelW - 8, barH), new StringFormat { Alignment = StringAlignment.Far });
 
-                // bg bar
                 var bgRect = new RectangleF(labelW, y, chartW, barH);
                 g.FillRectangle(new SolidBrush(Color.FromArgb(220, 225, 235)), bgRect);
 
-                // total bar
                 float totalW = maxVal == 0 ? 0 : chartW * total / maxVal;
                 g.FillRectangle(new SolidBrush(Color.FromArgb(180, MainShell.ThemeAccent)), new RectangleF(labelW, y, totalW, barH));
 
-                // done bar
                 float doneW = maxVal == 0 ? 0 : chartW * done / maxVal;
                 g.FillRectangle(new SolidBrush(Color.FromArgb(34, 160, 90)), new RectangleF(labelW, y, doneW, barH));
 
-                // number
                 g.DrawString($"{done}/{total}", fontNum, brushFg, labelW + totalW + 6, y + 8);
             }
 
-            // legend
-            g.FillRectangle(new SolidBrush(Color.FromArgb(34, 160, 90)), labelW, size.Height - 22, 14, 14);
-            g.DrawString("已完成", fontLbl, brushFg, labelW + 18, size.Height - 22);
-            g.FillRectangle(new SolidBrush(Color.FromArgb(180, MainShell.ThemeAccent)), labelW + 80, size.Height - 22, 14, 14);
-            g.DrawString("未完成", fontLbl, brushFg, labelW + 98, size.Height - 22);
+            // 圖例
+            int ly = size.Height - 26;
+            g.FillRectangle(new SolidBrush(Color.FromArgb(34, 160, 90)), labelW, ly, 14, 14);
+            g.DrawString("已完成", fontLbl, brushFg, labelW + 18, ly);
+            g.FillRectangle(new SolidBrush(Color.FromArgb(180, MainShell.ThemeAccent)), labelW + 80, ly, 14, 14);
+            g.DrawString("未完成", fontLbl, brushFg, labelW + 98, ly);
         }
 
         private GroupBox MakeGroup(string title) => new GroupBox
         {
-            Text = title, Font = new Font("微軟正黑體", 10F, FontStyle.Bold),
-            ForeColor = MainShell.ThemeFore, BackColor = MainShell.ThemePanel, Padding = new Padding(8)
+            Text = title,
+            Font = new Font("微軟正黑體", 10F, FontStyle.Bold),
+            ForeColor = MainShell.ThemeFore,
+            BackColor = MainShell.ThemePanel
         };
 
         private Label MakeStatLabel(string text, Color color, Point loc) => new Label
         {
-            Text = text, ForeColor = color, Location = loc, AutoSize = true,
+            Text = text,
+            ForeColor = color,
+            Location = loc,
+            AutoSize = true,
             Font = new Font("微軟正黑體", 11F, FontStyle.Bold)
         };
     }
