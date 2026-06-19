@@ -96,10 +96,10 @@ namespace HomeworkManager.Forms.Pages
 
             int row = 1;
             foreach (var (icon, text, color) in new (string, string, Color)[] {
-                ("🟡", "今天到期",      Color.FromArgb(180, 130, 0)),
-                ("🔴", "已逾期",        Color.FromArgb(210, 55, 55)),
-                ("✅", "已完成",        Color.FromArgb(34, 160, 90)),
-                ("●",  "粗體 = 有作業", MainShell.ThemeMuted)
+                ("🟡", "今天到期",        Color.FromArgb(180, 130, 0)),
+                ("🔴", "已逾期",          Color.FromArgb(210, 55, 55)),
+                ("✅", "已完成",          Color.FromArgb(34, 160, 90)),
+                ("●",  "粗體 = 有作業",   Color.FromArgb(120, 60, 200))
             })
             {
                 tblLegend.Controls.Add(new Label { Text = $"  {icon}  {text}", Font = new Font("微軟正黑體", 9.5F), ForeColor = color, Dock = DockStyle.Fill, TextAlign = System.Drawing.ContentAlignment.MiddleLeft }, 0, row++);
@@ -197,20 +197,21 @@ namespace HomeworkManager.Forms.Pages
             var row = dgvDay.Rows[e.RowIndex];
             if (row.DataBoundItem is Homework hw)
             {
+                bool dark = _shell.IsDark;
                 Color bg;
                 if (hw.IsCompleted)
-                    bg = Color.FromArgb(225, 255, 225);
+                    bg = dark ? Color.FromArgb(30, 70, 40) : Color.FromArgb(225, 255, 225);
                 else if (hw.DueDate.Date < DateTime.Today)
-                    bg = Color.FromArgb(255, 218, 218);
+                    bg = dark ? Color.FromArgb(90, 30, 30) : Color.FromArgb(255, 218, 218);
                 else if (hw.DueDate.Date == DateTime.Today)
-                    bg = Color.FromArgb(255, 245, 195);
+                    bg = dark ? Color.FromArgb(80, 70, 20) : Color.FromArgb(255, 245, 195);
                 else if ((hw.DueDate.Date - DateTime.Today).Days <= 3)
-                    bg = Color.FromArgb(255, 235, 200);
+                    bg = dark ? Color.FromArgb(75, 55, 15) : Color.FromArgb(255, 235, 200);
                 else
                     bg = MainShell.ThemePanel;
 
                 row.DefaultCellStyle.BackColor = bg;
-                row.DefaultCellStyle.ForeColor = MainShell.ThemeFore;
+                row.DefaultCellStyle.ForeColor = dark ? Color.FromArgb(220, 220, 220) : MainShell.ThemeFore;
                 row.DefaultCellStyle.SelectionBackColor = Color.FromArgb(80, 130, 220);
                 row.DefaultCellStyle.SelectionForeColor = Color.White;
             }

@@ -57,7 +57,7 @@ namespace HomeworkManager.Forms.Pages
             grpSearch.Dock = DockStyle.Top;
             grpSearch.Height = 76;
             grpSearch.Controls.Add(MakeLabel("搜尋：", new Point(12, 32)));
-            txtSearch = new TextBox { Location = new Point(82, 30), Size = new Size(280, 28), BackColor = MainShell.ThemePanel, ForeColor = MainShell.ThemeFore };
+            txtSearch = new TextBox { Location = new Point(96, 30), Size = new Size(270, 28), BackColor = MainShell.ThemePanel, ForeColor = MainShell.ThemeFore };
             txtSearch.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) DoSearch(); };
             grpSearch.Controls.Add(txtSearch);
             grpSearch.Controls.Add(MakeBtnAt("搜尋", Color.FromArgb(0, 123, 255), new Point(380, 26), (s, e) => DoSearch()));

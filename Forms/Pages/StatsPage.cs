@@ -98,6 +98,7 @@ namespace HomeworkManager.Forms.Pages
             var fontLbl = new Font("微軟正黑體", 9F);
             var fontNum = new Font("微軟正黑體", 9F, FontStyle.Bold);
             var brushFg = new SolidBrush(MainShell.ThemeFore);
+            var brushNum = new SolidBrush(_shell.IsDark ? Color.White : MainShell.ThemeFore);
 
             for (int i = 0; i < data.Count; i++)
             {
@@ -115,7 +116,7 @@ namespace HomeworkManager.Forms.Pages
                 float doneW = maxVal == 0 ? 0 : chartW * done / maxVal;
                 g.FillRectangle(new SolidBrush(Color.FromArgb(34, 160, 90)), new RectangleF(labelW, y, doneW, barH));
 
-                g.DrawString($"{done}/{total}", fontNum, brushFg, labelW + totalW + 6, y + 8);
+                g.DrawString($"{done}/{total}", fontNum, brushNum, labelW + totalW + 6, y + 8);
             }
 
             // 圖例
