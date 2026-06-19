@@ -16,78 +16,75 @@ namespace HomeworkManager.Forms.Pages
         public SettingsPage(HomeworkService service, MainShell shell)
         {
             _service = service;
-            _shell   = shell;
-            this.Padding   = new Padding(24);
+            _shell = shell;
+            this.Padding = new Padding(24);
             this.BackColor = MainShell.ThemeBg;
             Build();
         }
 
         private void Build()
         {
-            // ── 外觀 ──────────────────────────────────────────────────
-            var grpAppear = MakeGroup("🎨 外觀設定");
-            grpAppear.Dock   = DockStyle.Top;
-            grpAppear.Height = 100;
-
-            var btnDark = MakeBtn(_shell.IsDark ? "☀️ 切換為淺色模式" : "🌙 切換為深色模式",
-                Color.FromArgb(50, 50, 60), new Point(16, 36));
-            btnDark.Click += (s, e) =>
+            var tbl = new TableLayoutPanel
             {
-                _shell.ToggleDarkMode(!_shell.IsDark);
+                Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 4,
+                BackColor = Color.Transparent,
+                Padding = new Padding(4)
             };
+            tbl.RowStyles.Add(new RowStyle(SizeType.Absolute, 108));
+            tbl.RowStyles.Add(new RowStyle(SizeType.Absolute, 168));
+            tbl.RowStyles.Add(new RowStyle(SizeType.Absolute, 108));
+            tbl.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+
+            // ── 外觀設定 ──────────────────────────────────────────────
+            var grpAppear = MakeGroup("🎨 外觀設定");
+            grpAppear.Dock = DockStyle.Fill;
+            var btnDark = MakeBtn(_shell.IsDark ? "☀️ 切換為淺色模式" : "🌙 切換為深色模式", Color.FromArgb(50, 50, 60), new Point(16, 36));
+            btnDark.Click += (s, e) => _shell.ToggleDarkMode(!_shell.IsDark);
             grpAppear.Controls.Add(btnDark);
             grpAppear.Controls.Add(new Label { Text = "切換深色 / 淺色介面主題", Location = new Point(160, 46), AutoSize = true, ForeColor = MainShell.ThemeMuted, Font = new Font("微軟正黑體", 10F) });
-            this.Controls.Add(grpAppear);
+            tbl.Controls.Add(grpAppear, 0, 0);
 
             // ── 資料管理 ─────────────────────────────────────────────
             var grpData = MakeGroup("💾 資料管理");
-            grpData.Dock   = DockStyle.Top;
-            grpData.Height = 160;
-
+            grpData.Dock = DockStyle.Fill;
             var btnExport = MakeBtn("📤 匯出 CSV", Color.FromArgb(0, 123, 255), new Point(16, 36));
             btnExport.Click += BtnExport_Click;
             grpData.Controls.Add(btnExport);
             grpData.Controls.Add(new Label { Text = "將所有作業資料匯出為 CSV 檔案", Location = new Point(160, 46), AutoSize = true, ForeColor = MainShell.ThemeMuted, Font = new Font("微軟正黑體", 10F) });
-
             var btnBackup = MakeBtn("📁 備份資料", Color.FromArgb(40, 167, 69), new Point(16, 90));
             btnBackup.Click += BtnBackup_Click;
             grpData.Controls.Add(btnBackup);
             grpData.Controls.Add(new Label { Text = "將 JSON 資料檔複製備份至指定位置", Location = new Point(160, 100), AutoSize = true, ForeColor = MainShell.ThemeMuted, Font = new Font("微軟正黑體", 10F) });
+            tbl.Controls.Add(grpData, 0, 1);
 
-            this.Controls.Add(grpData);
-
-            // ── 危險區 ────────────────────────────────────────────────
+            // ── 危險操作 ─────────────────────────────────────────────
             var grpDanger = MakeGroup("⚠️ 危險操作");
-            grpDanger.Dock   = DockStyle.Top;
-            grpDanger.Height = 100;
-
+            grpDanger.Dock = DockStyle.Fill;
             var btnClear = MakeBtn("🗑️ 清除所有資料", Color.FromArgb(210, 55, 55), new Point(16, 36));
             btnClear.Click += BtnClearAll_Click;
             grpDanger.Controls.Add(btnClear);
-            grpDanger.Controls.Add(new Label { Text = "永久刪除所有作業資料，無法復原！", Location = new Point(176, 46), AutoSize = true, ForeColor = Color.FromArgb(210, 55, 55), Font = new Font("微軟正黑體", 10F, FontStyle.Bold) });
-
-            this.Controls.Add(grpDanger);
+            grpDanger.Controls.Add(new Label { Text = "永久刪除所有作業資料，無法復原！", Location = new Point(160, 46), AutoSize = true, ForeColor = Color.FromArgb(210, 55, 55), Font = new Font("微軟正黑體", 10F, FontStyle.Bold) });
+            tbl.Controls.Add(grpDanger, 0, 2);
 
             // ── 關於 ─────────────────────────────────────────────────
             var grpAbout = MakeGroup("ℹ️ 關於");
-            grpAbout.Dock   = DockStyle.Top;
-            grpAbout.Height = 100;
-            grpAbout.Controls.Add(new Label
-            {
-                Text      = "學生作業管理系統  Student Homework Management System\n版本 2.0  |  .NET Framework 4.8  |  WinForms",
-                Location  = new Point(16, 32),
-                AutoSize  = true,
-                Font      = new Font("微軟正黑體", 10F),
-                ForeColor = MainShell.ThemeMuted
-            });
-            this.Controls.Add(grpAbout);
+            grpAbout.Dock = DockStyle.Fill;
+            grpAbout.Controls.Add(new Label { Text = "學生作業管理系統  Student Homework Management System\n版本 2.0  |  .NET Framework 4.8  |  WinForms", Location = new Point(16, 32), AutoSize = true, Font = new Font("微軟正黑體", 10F), ForeColor = MainShell.ThemeMuted });
+            tbl.Controls.Add(grpAbout, 0, 3);
+
+            this.Controls.Add(tbl);
         }
 
         private GroupBox MakeGroup(string title) => new GroupBox
         {
-            Text = title, Font = new Font("微軟正黑體", 10F, FontStyle.Bold),
-            ForeColor = MainShell.ThemeFore, BackColor = MainShell.ThemePanel,
-            Padding = new Padding(8), Margin = new Padding(0, 0, 0, 14)
+            Text = title,
+            Font = new Font("微軟正黑體", 10F, FontStyle.Bold),
+            ForeColor = MainShell.ThemeFore,
+            BackColor = MainShell.ThemePanel,
+            Padding = new Padding(8),
+            Margin = new Padding(0, 0, 0, 14)
         };
 
         private Button MakeBtn(string text, Color bg, Point loc)

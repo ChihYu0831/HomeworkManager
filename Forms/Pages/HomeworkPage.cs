@@ -184,7 +184,13 @@ namespace HomeworkManager.Forms.Pages
             _isLoading = false;
         }
 
-        private void DoSearch() => RefreshGrid(_service.Search(txtSearch.Text.Trim()));
+        private void DoSearch()
+        {
+            var list = _service.Search(txtSearch.Text.Trim());
+            RefreshGrid(list);
+            if (list.Count == 0 && !string.IsNullOrWhiteSpace(txtSearch.Text))
+                MessageBox.Show("找不到符合的作業。", "搜尋結果", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
 
         private void Dgv_SelectionChanged(object sender, EventArgs e)
         {
@@ -245,6 +251,10 @@ namespace HomeworkManager.Forms.Pages
         private void BtnComplete_Click(object sender, EventArgs e)
         {
             if (_selectedId == null) { MessageBox.Show("請先選取作業。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+            var hw = _service.GetAll().Find(h => h.Id == _selectedId);
+            if (hw == null) return;
+            if (hw.IsCompleted) { MessageBox.Show("這筆作業已經是完成狀態！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
+            if (hw.DueDate.Date < DateTime.Today) { MessageBox.Show("此作業已逾期，無法標記完成。\n請先修改截止日期再標記。", "無法操作", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
             _service.MarkCompleted(_selectedId); RefreshGrid(_service.GetAll()); ClearInputs();
             MessageBox.Show("✅ 已標記為完成！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
