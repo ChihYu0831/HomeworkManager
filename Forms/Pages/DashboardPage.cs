@@ -94,10 +94,13 @@ namespace HomeworkManager.Forms.Pages
             var pnlProg = new Panel { Dock = DockStyle.Fill, BackColor = MainShell.ThemePanel, Padding = new Padding(14, 8, 14, 8) };
             var lblProgTitle = new Label { Text = "📈 完成率", Font = new Font("微軟正黑體", 11F, FontStyle.Bold), ForeColor = MainShell.ThemeFore, Location = new Point(14, 8), Size = new Size(200, 28) };
             var lblProgVal = new Label { Text = string.Format("{0:F1}%  （{1} / {2} 筆已完成）", rate, done, total), Font = new Font("微軟正黑體", 10F), ForeColor = MainShell.ThemeFore, Location = new Point(14, 38), Size = new Size(400, 24) };
-            var pb = new ProgressBar { Minimum = 0, Maximum = 100, Value = (int)rate, Location = new Point(14, 66), Size = new Size(700, 22), Style = ProgressBarStyle.Continuous };
+            var pbPanel = new Panel { Location = new Point(0, 66), Height = 22, Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top, BackColor = Color.Transparent };
+            var pb = new ProgressBar { Minimum = 0, Maximum = 100, Value = (int)rate, Dock = DockStyle.Fill, Style = ProgressBarStyle.Continuous };
+            pbPanel.Controls.Add(pb);
             pnlProg.Controls.Add(lblProgTitle);
             pnlProg.Controls.Add(lblProgVal);
-            pnlProg.Controls.Add(pb);
+            pnlProg.Controls.Add(pbPanel);
+            pnlProg.Resize += (s, e) => pbPanel.Width = pnlProg.Width;
             pnlBottom.Controls.Add(pnlProg, 0, 0);
 
             var pnlCards = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.LeftToRight, WrapContents = false, BackColor = Color.Transparent, Padding = new Padding(0, 10, 0, 0) };
