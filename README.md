@@ -101,3 +101,13 @@
 | ⬜ 白色 | 一般（4 天以上） |
 
 ---
+
+<img width="1597" height="1017" alt="image" src="https://github.com/user-attachments/assets/be7ad7d1-da50-4a8b-8816-1bff80c0e78e" />
+
+<img width="1595" height="1017" alt="image" src="https://github.com/user-attachments/assets/d3746eea-e6ee-4393-9739-235c56888f36" />
+
+<img width="1592" height="1015" alt="image" src="https://github.com/user-attachments/assets/b0cc6ae9-bea4-4fcf-94e6-ca4454cc8ec3" />
+
+<img width="1597" height="1017" alt="image" src="https://github.com/user-attachments/assets/b16a2f28-3de0-4a38-ae70-314a9089fe04" />
+
+<img width="1596" height="1017" alt="image" src="https://github.com/user-attachments/assets/e32013fa-0d28-42c8-ad53-fc12ab372819" />
