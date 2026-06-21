@@ -82,11 +82,12 @@ namespace HomeworkManager.Forms.Pages
             {
                 Dock = DockStyle.Fill,
                 ColumnCount = 1,
-                RowCount = 5,
+                RowCount = 6,
                 BackColor = Color.Transparent,
                 Padding = new Padding(0, 10, 0, 0)
             };
             tblLegend.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
+            tblLegend.RowStyles.Add(new RowStyle(SizeType.Absolute, 24));
             tblLegend.RowStyles.Add(new RowStyle(SizeType.Absolute, 24));
             tblLegend.RowStyles.Add(new RowStyle(SizeType.Absolute, 24));
             tblLegend.RowStyles.Add(new RowStyle(SizeType.Absolute, 24));
@@ -99,6 +100,7 @@ namespace HomeworkManager.Forms.Pages
                 ("🟡", "今天到期",        Color.FromArgb(180, 130, 0)),
                 ("🔴", "已逾期",          Color.FromArgb(210, 55, 55)),
                 ("✅", "已完成",          Color.FromArgb(34, 160, 90)),
+                ("🟠", "3天內即將到期",   Color.FromArgb(200, 100, 20)),
                 ("●",  "粗體 = 有作業",   Color.FromArgb(120, 60, 200))
             })
             {
