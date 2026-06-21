@@ -256,8 +256,32 @@ namespace HomeworkManager.Forms.Pages
             if (hw.IsCompleted) { MessageBox.Show("這筆作業已經是完成狀態！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
             if (hw.DueDate.Date < DateTime.Today) { MessageBox.Show("此作業已逾期，無法標記完成。\n請先修改截止日期再標記。", "無法操作", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
             _service.MarkCompleted(_selectedId); RefreshGrid(_service.GetAll()); ClearInputs();
+            PlayCompleteSound();
             MessageBox.Show("✅ 已標記為完成！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool MessageBeep(uint uType);
+
+        private void PlayCompleteSound()
+        {
+            try
+            {
+                // 直接播放 Windows 內建音效檔
+                string wavPath = @"C:\Windows\Media\chimes.wav";
+                if (!System.IO.File.Exists(wavPath))
+                    wavPath = @"C:\Windows\Media\notify.wav";
+                if (!System.IO.File.Exists(wavPath))
+                    wavPath = @"C:\Windows\Media\Windows Notify System Generic.wav";
+                if (System.IO.File.Exists(wavPath))
+                {
+                    var player = new System.Media.SoundPlayer(wavPath);
+                    player.Play();
+                }
+            }
+            catch { }
+        }
+        
         private void BtnClear_Click(object sender, EventArgs e) => ClearInputs();
 
         private bool Val()
